@@ -36,49 +36,80 @@ def playerPos(playerStart, layout, visit):
         for i in range(len(x)):
             if x[i] in visit:
                 x.remove(x[i])
-                x.insert(i, '[-]')
+                x.insert(i, '[x]')
     return bluePrint
+
+def validMove1(layout, previous, playerStart):
+    for x in range(len(layout)):
+        for i in layout[x]:
+            if i == playerStart:
+                return True
+    return False
 
 loop = 'y'
 
 while loop.lower() == 'y':
+    prevPos = ''
     visited = []
     bluePrint = boardReset()
     updateLab(bluePrint)
-    msX, msY = rd.randint(0, 4), rd.randint(0, 2)
-    aX, aY = rd.randint(0, 4), rd.randint(0, 1)
+    msX, msY = rd.randint(0, 4), rd.randint(0, 4)
+    aX, aY = rd.randint(0, 4), rd.randint(0, 4)
     antidoteLoc = bluePrint[aY][aX]
     madScientistLoc = bluePrint[msY][msX]
-    currentPos = bluePrint[4][2]
+    if antidoteLoc == madScientistLoc:
+        aX, aY = rd.randint(0, 4), rd.randint(0, 4)
+    currentPos = ''
 
-    while True:
+    for attempts in range(1,11):
+        if attempts == 10:
+            print('Last chance!')
+        else:
+            print('Attempt: ' + str(attempts) + ' of 10.')
         visited.append(currentPos)
         #print(visited)
         if madScientistLoc == currentPos:
             antidote(bluePrint)
             msStarter(bluePrint)
+            playerPos(currentPos, bluePrint, visited)
             print(updateLab(bluePrint))
             print('Oh no! The Mad Scientist found you!')
-            print('The antidote was in room ' + str(antidoteLoc))
+            print('The antidote was in room ' + str(antidoteLoc) + '.')
             break
         elif antidoteLoc == currentPos:
             antidote(bluePrint)
             msStarter(bluePrint)
+            playerPos(currentPos, bluePrint, visited)
             print(updateLab(bluePrint))
             print('Hooray! You found the antidote in time!')
             break
         else:
             bluePrint = boardReset()
             playerPos(currentPos, bluePrint,visited)
+            prevPos = currentPos
             print(updateLab(bluePrint))
-            print('Enter the next room you wish to visit.')
-            currentPos = input('> ').upper()
+            while True:
+                print('Enter the next room number you wish to check.')
+                currentPos = input('> ').upper()
+                bluePrint = boardReset()
+                valid = validMove1(bluePrint, prevPos, currentPos)
+                if currentPos in visited:
+                    print('You\'ve already checked this room.')
+                    continue
+                elif not valid:
+                    print('Please enter a valid room number.')
+                    continue
+                else:
+                    print('No luck in room ' + currentPos + '.')
+                    break
             continue
+    if currentPos == antidoteLoc:
+        print('You consumed the potion and you survived the poison!')
+    elif currentPos == madScientistLoc:
+        print('\tGAME OVER\t'.center(20,'*'))
+    else:
+        print('\tGAME OVER\t'.center(20, '*'))
+        print('You\'ve run out of time before finding the Antidote.')
 
-    print('Would you like to play again? (y or n)')
+    print('\nWould you like to play again? (y or n)')
     loop = input('> ')
-
-
-
-
-
